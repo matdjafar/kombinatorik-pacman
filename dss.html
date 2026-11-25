@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Pac-Kombinatorika | Gim Edukasi Papan Interaktif</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Fredoka (Arcade/Edu friendly) & Plus Jakarta Sans (Clean readability) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Konfigurasi MathJax 3 -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-panel: #111827;
+      --neon-cyan: #38bdf8;
+      --neon-yellow: #facc15;
+      --neon-purple: #a855f7;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at top, #131c33 0%, #070b14 70%);
+      color: #f8fafc;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .font-arcade {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    /* Gaya Tombol Arcade 3D untuk Papan Interaktif */
+    .btn-arcade {
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+    }
+    .btn-arcade:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+    }
+
+    /* Tombol D-Pad Besar Ramah Sentuh */
+    .dpad-btn {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 2px solid #38bdf8;
+      box-shadow: 0 5px 0 #0284c7, 0 0 12px rgba(56, 189, 248, 0.25);
+      transition: all 0.08s ease;
+    }
+    .dpad-btn:active, .dpad-btn.active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #0284c7, 0 0 20px rgba(56, 189, 248, 0.6);
+      background: linear-gradient(145deg, #0284c7, #0369a1);
+    }
+
+    /* Bezel Kanvas Gim */
+    .canvas-bezel {
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.18), inset 0 0 20px rgba(0, 0, 0, 0.6);
+      border: 3px solid rgba(56, 189, 248, 0.45);
+    }
+
+    /* Animasi Halus untuk Modal */
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-pop {
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Scrollbar khusus untuk modal materi */
+    .custom-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0f172a;
+      border-radius: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Penyesuaian MathJax agar responsif dan kontras */
+    mjx-container {
+      color: inherit !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ==================== HEADER NAVIGASI ==================== -->
+  <header class="w-full bg-slate-900/90 backdrop-blur-md border-b border-sky-500/30 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Logo & Judul -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+          <!-- Ikon Pac-Man SVG -->
+          <svg viewBox="0 0 36 36" class="w-7 h-7">
+            <path d="M18 18 L32 10 A16 16 0 1 0 32 26 Z" fill="#0f172a"/>
+            <circle cx="19" cy="10" r="2.2" fill="#facc15"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-arcade text-lg sm:text-2xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-sky-400 leading-tight">
+            PAC-KOMBINATORIKA
+          </h1>
+          <p class="text-[11px] sm:text-xs text-slate-400 font-medium">
+            Persiapan Peluang Kejadian Majemuk • Papan Interaktif Digital
+          </p>
+        </div>
+      </div>
+
+      <!-- Tombol Aksi Utama -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <select id="teamSelector" aria-label="Pilih Kelompok Aktif" class="px-3 py-2 rounded-xl bg-amber-500/20 border border-amber-400/60 text-amber-200 font-bold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
+          <option value="0" class="bg-slate-900 text-white">🔴 Kelompok 1</option>
+          <option value="1" class="bg-slate-900 text-white">🔵 Kelompok 2</option>
+          <option value="2" class="bg-slate-900 text-white">🟢 Kelompok 3</option>
+          <option value="3" class="bg-slate-900 text-white">🟡 Kelompok 4</option>
+          <option value="4" class="bg-slate-900 text-white">🟣 Kelompok 5</option>
+        </select>
+
+        <button id="btnOpenLeaderboard" class="btn-arcade px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-1.5">
+          <span>🏆</span> <span>Papan Skor</span>
+        </button>
+
+        <button id="btnOpenMaterial" class="btn-arcade px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5">
+          <span>📖</span> <span>Materi Pengantar</span>
+        </button>
+
+        <select id="levelSelector" aria-label="Pilih Level Materi" class="px-3 py-2 rounded-xl bg-slate-800 border border-sky-500/40 text-sky-200 font-semibold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer">
+          <option value="0">Level 1: Pengisian Tempat</option>
+          <option value="1">Level 2: Permutasi</option>
+          <option value="2">Level 3: Kombinasi & Peluang</option>
+        </select>
+
+        <button id="btnSound" title="Suara Aktif/Nonaktif" class="btn-arcade p-2 rounded-xl bg-slate-800 border border-slate-600 hover:bg-slate-700 text-lg leading-none">
+          🔊
+        </button>
+
+        <button id="btnFullscreen" title="Mode Layar Penuh" class="btn-arcade px-3 py-2 rounded-xl bg-slate-800 border border-slate-600 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-200 hidden sm:flex items-center gap-1">
+          <span>⛶</span> <span>Layar Penuh</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== AREA UTAMA (KANVAS + PANEL KONTROL) ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-5 py-4 flex flex-col lg:flex-row gap-5 items-stretch justify-center">
+
+    <!-- KOLOM KIRI: HUD + KANVAS GIM -->
+    <section class="flex-1 flex flex-col gap-3 min-w-0">
+      <!-- Bar Status (HUD) -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900/80 border border-slate-700/80 rounded-2xl p-2.5 sm:p-3">
+        <div class="bg-slate-800/80 rounded-xl px-3 py-1.5 flex flex-col justify-center col-span-2 sm:col-span-1 border border-amber-500/30">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Giliran</span>
+          <span id="hudTeam" class="font-arcade text-base sm:text-lg text-amber-300 truncate">🔴 Kelompok 1</span>
+        </div>
+        <div class="bg-slate-800/80 rounded-xl px-3 py-1.5 flex flex-col">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Skor Sesi</span>
+          <span id="hudScore" class="font-arcade text-xl sm:text-2xl text-yellow-400">0</span>
+        </div>
+        <div class="bg-slate-800/80 rounded-xl px-3 py-1.5 flex flex-col">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Nyawa</span>
+          <span id="hudLives" class="text-lg sm:text-xl tracking-widest mt-0.5">❤️❤️❤️</span>
+        </div>
+        <div class="bg-slate-800/80 rounded-xl px-3 py-1.5 flex flex-col">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Orb Soal</span>
+          <span id="hudOrbs" class="font-arcade text-xl sm:text-2xl text-sky-400">0 / 4</span>
+        </div>
+        <div class="bg-slate-800/80 rounded-xl px-3 py-1.5 flex flex-col justify-center">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Status</span>
+          <span id="hudStatus" class="text-xs sm:text-sm font-bold text-emerald-400 truncate">Siap Bermain</span>
+        </div>
+      </div>
+
+      <!-- Indikator Mode Super (Muncul saat berhasil menjawab soal) -->
+      <div id="superModeBarWrap" class="hidden bg-slate-900/90 border border-amber-400/60 rounded-xl px-3 py-1.5 flex items-center gap-3">
+        <span class="text-xs sm:text-sm font-bold text-amber-300 whitespace-nowrap animate-pulse">⚡ MODE SUPER! Makan Hantu (+200)</span>
+        <div class="flex-1 h-2.5 bg-slate-800 rounded-full overflow-hidden">
+          <div id="superModeBar" class="h-full bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-100" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <!-- Kontainer Kanvas Responsif -->
+      <div id="canvasContainer" class="relative w-full aspect-[15/11] max-h-[68vh] mx-auto rounded-2xl overflow-hidden bg-slate-950 canvas-bezel flex items-center justify-center">
+        <canvas id="gameCanvas" class="block w-full h-full"></canvas>
+
+        <!-- Overlay Mulai / Jeda di atas Kanvas -->
+        <div id="canvasOverlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-5 text-center z-10">
+          <div class="flex flex-wrap items-center justify-center gap-2 mb-3">
+            <span id="overlayTeamBadge" class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs sm:text-sm font-bold">
+              🔴 Giliran: Kelompok 1
+            </span>
+            <span id="overlayLevelBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs sm:text-sm font-semibold">
+              Level 1 • Aturan Pengisian Tempat
+            </span>
+          </div>
+          <h2 id="overlayTitle" class="font-arcade text-2xl sm:text-4xl text-yellow-300 mb-2 drop-shadow">
+            Misi Kombinatorika!
+          </h2>
+          <p id="overlayDesc" class="text-slate-300 text-xs sm:text-base max-w-md mb-2 leading-relaxed">
+            Arahkan Pac-Man memakan <strong class="text-fuchsia-300">4 Bola Soal Bercahaya</strong> di sudut labirin. Jawab benar untuk mengaktifkan <strong class="text-amber-300">Mode Super</strong> dan mengalahkan hantu!
+          </p>
+          <p id="overlayDeckInfo" class="text-[11px] sm:text-xs text-emerald-300/90 font-semibold mb-5">
+            🎲 4 soal acak unik diambil dari Bank Soal (15 soal/level)
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button id="btnStartGame" class="btn-arcade px-6 py-3 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-arcade text-base sm:text-lg tracking-wide">
+              ▶ MULAI BERMAIN
+            </button>
+            <button id="btnOverlayMaterial" class="btn-arcade px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-indigo-400/50 text-indigo-200 font-semibold text-sm sm:text-base">
+              📖 Pelajari Materi Dulu
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KOLOM KANAN: KONTROL SENTUH PAPAN INTERAKTIF & KARTU RUMUS CEPAT -->
+    <aside class="w-full lg:w-80 xl:w-96 flex flex-col gap-4 shrink-0">
+
+      <!-- Panel D-Pad Besar untuk Papan Interaktif -->
+      <div class="bg-slate-900/85 border border-slate-700/80 rounded-2xl p-4 flex flex-col items-center">
+        <div class="w-full flex items-center justify-between mb-3">
+          <h3 class="font-arcade text-sm sm:text-base text-sky-300 flex items-center gap-1.5">
+            <span>🎮</span> Kontrol Sentuh
+          </h3>
+          <button id="btnPause" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold text-slate-200">
+            ⏸ Jeda
+          </button>
+        </div>
+
+        <!-- Grid D-Pad 3x3 -->
+        <div class="grid grid-cols-3 gap-2.5 w-52 sm:w-56">
+          <div></div>
+          <button data-dir="UP" class="dpad-btn h-14 sm:h-16 rounded-2xl flex items-center justify-center text-2xl text-sky-300" aria-label="Atas">▲</button>
+          <div></div>
+
+          <button data-dir="LEFT" class="dpad-btn h-14 sm:h-16 rounded-2xl flex items-center justify-center text-2xl text-sky-300" aria-label="Kiri">◄</button>
+          <button id="btnCenterRestart" title="Ulangi Level" class="rounded-2xl bg-slate-800/90 border border-slate-600 hover:bg-slate-700 flex items-center justify-center text-lg text-slate-300 active:scale-95 transition">
+            🔄
+          </button>
+          <button data-dir="RIGHT" class="dpad-btn h-14 sm:h-16 rounded-2xl flex items-center justify-center text-2xl text-sky-300" aria-label="Kanan">►</button>
+
+          <div></div>
+          <button data-dir="DOWN" class="dpad-btn h-14 sm:h-16 rounded-2xl flex items-center justify-center text-2xl text-sky-300" aria-label="Bawah">▼</button>
+          <div></div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mt-3 text-center">
+          Mendukung <strong class="text-slate-300">Sentuh D-Pad</strong>, <strong class="text-slate-300">Usap (Swipe)</strong> di labirin, atau <strong class="text-slate-300">Tombol Panah / WASD</strong>.
+        </p>
+      </div>
+
+      <!-- Kartu Rumus Cepat (Bisa Disembunyikan Guru untuk Mode Latihan) -->
+      <div class="bg-slate-900/85 border border-indigo-500/30 rounded-2xl p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <h3 class="font-arcade text-sm sm:text-base text-indigo-300 flex items-center gap-1.5">
+            <span>📌</span> Rumus Level Ini
+          </h3>
+          <button id="btnToggleFormula" class="px-2.5 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/40 text-[11px] font-semibold text-indigo-200 hover:bg-indigo-900/80">
+            👁 Sembunyikan
+          </button>
+        </div>
+
+        <div id="quickFormulaBox" class="text-xs sm:text-sm text-slate-200 space-y-2.5 bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex-1 leading-relaxed">
+          <!-- Diisi dinamis oleh JS + MathJax -->
+        </div>
+
+        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+          <span>Bola Ungu = Soal Matematika</span>
+          <span class="text-yellow-400 font-semibold">Titik = +10 poin</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ==================== MODAL MATERI PENGANTAR INTERAKTIF ==================== -->
+  <div id="materialModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="animate-pop w-full max-w-4xl max-h-[90vh] bg-slate-900 border-2 border-indigo-500/50 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      <!-- Header Modal Materi -->
+      <div class="px-5 py-4 bg-gradient-to-r from-indigo-900/80 to-slate-900 border-b border-indigo-500/30 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="font-arcade text-xl sm:text-2xl text-indigo-200 flex items-center gap-2">
+            <span>📚</span> Materi Pengantar Kombinatorika
+          </h2>
+          <p class="text-xs sm:text-sm text-indigo-300/80">Bekal Penting Menuju Peluang Kejadian Majemuk</p>
+        </div>
+        <button id="btnCloseMaterial" class="btn-arcade px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm">
+          ✕ Tutup
+        </button>
+      </div>
+
+      <!-- Tab Navigasi Materi -->
+      <div class="px-4 py-2.5 bg-slate-950/70 border-b border-slate-800 flex gap-2 overflow-x-auto">
+        <button data-tab="0" class="mat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition bg-indigo-600 text-white">
+          1. Kaitan ke Peluang
+        </button>
+        <button data-tab="1" class="mat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+          2. Pengisian Tempat
+        </button>
+        <button data-tab="2" class="mat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+          3. Permutasi
+        </button>
+        <button data-tab="3" class="mat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+          4. Kombinasi
+        </button>
+      </div>
+
+      <!-- Konten Materi (Scrollable) -->
+      <div id="materialContent" class="p-5 sm:p-6 overflow-y-auto custom-scroll flex-1 text-slate-200 text-sm sm:text-base leading-relaxed space-y-4">
+        <!-- Diisi dinamis oleh JS + MathJax -->
+      </div>
+
+      <!-- Footer Modal Materi -->
+      <div class="px-5 py-3.5 bg-slate-950/80 border-t border-slate-800 flex items-center justify-between gap-3">
+        <button id="btnPrevTab" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm">
+          ← Sebelumnya
+        </button>
+        <button id="btnNextTab" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm">
+          Selanjutnya →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL TANTANGAN SOAL KOMBINATORIKA ==================== -->
+  <div id="questionModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="animate-pop w-full max-w-2xl max-h-[92vh] bg-slate-900 border-2 border-fuchsia-500/60 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      <!-- Header Soal -->
+      <div class="px-5 py-3.5 bg-gradient-to-r from-fuchsia-900/70 via-purple-900/70 to-slate-900 border-b border-fuchsia-500/30 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🔮</span>
+          <span id="qTopicBadge" class="font-arcade text-sm sm:text-base text-fuchsia-200">Tantangan Kombinatorika</span>
+        </div>
+        <span id="qNumberBadge" class="px-3 py-1 rounded-full bg-slate-950/60 border border-fuchsia-400/40 text-xs font-bold text-fuchsia-300">
+          Soal 1 / 4
+        </span>
+      </div>
+
+      <!-- Isi Soal & Opsi -->
+      <div class="p-5 sm:p-6 overflow-y-auto custom-scroll space-y-5">
+        <div id="qText" class="text-base sm:text-lg font-medium text-white bg-slate-950/70 border border-slate-700/80 rounded-2xl p-4 leading-relaxed">
+          <!-- Teks soal dirender oleh MathJax -->
+        </div>
+
+        <!-- Pilihan Jawaban A, B, C, D -->
+        <div id="qOptions" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Tombol opsi diisi dinamis -->
+        </div>
+
+        <!-- Panel Umpan Balik & Pembahasan -->
+        <div id="qFeedback" class="hidden rounded-2xl p-4 border space-y-2">
+          <div id="qFeedbackTitle" class="font-arcade text-lg flex items-center gap-2"></div>
+          <div id="qExplanation" class="text-sm sm:text-base text-slate-200 leading-relaxed"></div>
+          <div class="pt-2 flex justify-end">
+            <button id="btnContinueAfterQ" class="btn-arcade px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-arcade text-sm sm:text-base">
+              Lanjutkan Permainan ▶
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL SELESAI LEVEL / GAME OVER ==================== -->
+  <div id="resultModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="animate-pop w-full max-w-md bg-slate-900 border-2 border-yellow-400/60 rounded-3xl p-6 text-center shadow-2xl space-y-4">
+      <div id="resIcon" class="text-5xl">🏆</div>
+      <div id="resTeamTag" class="inline-block px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-bold">
+        🔴 Kelompok 1
+      </div>
+      <h2 id="resTitle" class="font-arcade text-2xl sm:text-3xl text-yellow-300">Level Selesai!</h2>
+      <p id="resDesc" class="text-sm sm:text-base text-slate-300"></p>
+
+      <div class="grid grid-cols-2 gap-3 bg-slate-950/70 rounded-2xl p-3.5 border border-slate-800">
+        <div>
+          <div class="text-xs text-slate-400">Skor Sesi Ini</div>
+          <div id="resScore" class="font-arcade text-2xl text-yellow-400">0</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">Akurasi Soal</div>
+          <div id="resAccuracy" class="font-arcade text-2xl text-emerald-400">0 / 4</div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2.5 pt-2">
+        <button id="btnResNextTeam" class="btn-arcade w-full px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-arcade text-base">
+          ➡️ Giliran Kelompok Berikutnya
+        </button>
+        <div class="flex flex-wrap justify-center gap-2.5">
+          <button id="btnResLeaderboard" class="btn-arcade flex-1 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm">
+            🏆 Papan Skor
+          </button>
+          <button id="btnResReplay" class="btn-arcade flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-semibold text-xs sm:text-sm">
+            🔄 Main Lagi
+          </button>
+          <button id="btnResNext" class="btn-arcade flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs sm:text-sm">
+            Level +1 ▶
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL PAPAN SKOR 5 KELOMPOK ==================== -->
+  <div id="leaderboardModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="animate-pop w-full max-w-2xl max-h-[90vh] bg-slate-900 border-2 border-amber-400/60 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      <div class="px-5 py-4 bg-gradient-to-r from-amber-900/60 to-slate-900 border-b border-amber-500/30 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="font-arcade text-xl sm:text-2xl text-amber-300 flex items-center gap-2">
+            <span>🏆</span> Papan Skor 5 Kelompok
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300">Klik nama kelompok untuk mengganti giliran bermain secara langsung</p>
+        </div>
+        <button id="btnCloseLeaderboard" class="btn-arcade px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm">
+          ✕ Tutup
+        </button>
+      </div>
+
+      <div id="leaderboardList" class="p-4 sm:p-5 overflow-y-auto custom-scroll space-y-2.5 flex-1">
+        <!-- Diisi dinamis oleh JS -->
+      </div>
+
+      <div class="px-5 py-3.5 bg-slate-950/80 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div id="deckStatusSummary" class="text-xs text-slate-400">
+          Bank Soal: 45 soal unik tersedia
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnResetLeaderboard" class="px-3.5 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-200 font-semibold text-xs sm:text-sm">
+            🗑️ Reset Skor Kelas
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPT UTAMA GIM & EDUKASI ==================== -->
+  <script>
+    /**
+     * =========================================================================
+     * 1. UTILITAS MATHJAX & EFEK SUARA RETRO (WEB AUDIO API)
+     * =========================================================================
+     */
+    function renderMath(targetEl) {
+      try {
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+          const elements = targetEl ? [targetEl] : undefined;
+          if (elements && typeof window.MathJax.typesetClear === 'function') {
+            window.MathJax.typesetClear(elements);
+          }
+          window.MathJax.typesetPromise(elements).catch(() => {});
+        }
+      } catch (err) {
+        console.warn('MathJax render warning:', err);
+      }
+    }
+
+    const SoundFX = (() => {
+      let audioCtx = null;
+      let enabled = true;
+
+      function getCtx() {
+        if (!enabled) return null;
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      }
+
+      function playTone(freq, duration, type = 'square', volume = 0.06, slideTo = null) {
+        try {
+          const ctxAudio = getCtx();
+          if (!ctxAudio) return;
+          const osc = ctxAudio.createOscillator();
+          const gain = ctxAudio.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, ctxAudio.currentTime);
+          if (slideTo) {
+            osc.frequency.exponentialRampToValueAtTime(slideTo, ctxAudio.currentTime + duration);
+          }
+          gain.gain.setValueAtTime(volume, ctxAudio.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(ctxAudio.destination);
+          osc.start();
+          osc.stop(ctxAudio.currentTime + duration);
+        } catch (_) {}
+      }
+
+      return {
+        toggle() {
+          enabled = !enabled;
+          return enabled;
+        },
+        chomp() { playTone(320, 0.055, 'triangle', 0.04, 480); },
+        orb() {
+          playTone(520, 0.09, 'sine', 0.08, 780);
+          setTimeout(() => playTone(780, 0.12, 'sine', 0.08, 1040), 75);
+        },
+        eatGhost() { playTone(600, 0.16, 'sawtooth', 0.07, 1200); },
+        hurt() { playTone(260, 0.28, 'sawtooth', 0.08, 90); },
+        correct() {
+          playTone(523.25, 0.1, 'triangle', 0.08);
+          setTimeout(() => playTone(659.25, 0.1, 'triangle', 0.08), 90);
+          setTimeout(() => playTone(783.99, 0.18, 'triangle', 0.09), 180);
+        },
+        wrong() {
+          playTone(240, 0.14, 'sawtooth', 0.07);
+          setTimeout(() => playTone(185, 0.22, 'sawtooth', 0.07), 130);
+        },
+        win() {
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+            setTimeout(() => playTone(f, 0.16, 'triangle', 0.09), idx * 110);
+          });
+        }
+      };
+    })();
+
+    /**
+     * =========================================================================
+     * 2. MATERI PENGANTAR KOMBINATORIKA (4 TAB INTERAKTIF DENGAN MATHJAX)
+     * =========================================================================
+     */
+    const MATERIALS = [
+      {
+        title: "1. Mengapa Kombinatorika Penting untuk Peluang Kejadian Majemuk?",
+        html: `
+          <p>Sebelum menghitung <strong>Peluang Kejadian Majemuk</strong> (seperti peluang terambilnya beberapa bola sekaligus, dua kartu, atau kejadian saling bebas/saling lepas), kita perlu menentukan dua hal utama secara cepat dan tepat:</p>
+          <div class="bg-slate-950/70 border border-sky-500/40 rounded-2xl p-4 text-center">
+            $$P(A) = \\frac{n(A)}{n(S)}$$
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">$n(A)$ = banyak titik sampel kejadian $A$, dan $n(S)$ = banyak seluruh titik sampel ruang sampel $S$.</p>
+          </div>
+          <p>Jika objeknya banyak (misalnya memilih $3$ bola dari $10$ bola), mendaftar satu per satu sangat tidak efisien. Di sinilah <strong>Kaidah Pencacahan (Kombinatorika)</strong> berperan:</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+            <li><strong class="text-yellow-300">Aturan Pengisian Tempat:</strong> Menghitung susunan bertahap dengan syarat tertentu.</li>
+            <li><strong class="text-sky-300">Permutasi:</strong> Menghitung susunan ketika <strong>urutan diperhatikan</strong> (misalnya jabatan, peringkat, sandi).</li>
+            <li><strong class="text-emerald-300">Kombinasi:</strong> Menghitung pilihan ketika <strong>urutan tidak diperhatikan</strong> (misalnya pengambilan bola sekaligus atau memilih tim).</li>
+          </ul>
+        `
+      },
+      {
+        title: "2. Aturan Pengisian Tempat (Filling Slots)",
+        html: `
+          <p>Aturan pengisian tempat terdiri dari dua prinsip dasar:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="bg-slate-950/70 border border-sky-500/40 rounded-2xl p-4">
+              <h4 class="font-arcade text-sky-300 mb-1">Aturan Penjumlahan ("atau")</h4>
+              <p class="text-xs sm:text-sm text-slate-300">Digunakan untuk kejadian saling lepas (memilih salah satu saja):</p>
+              <div class="mt-2 text-center font-semibold">$$k_1 + k_2 + \\dots + k_n$$</div>
+            </div>
+            <div class="bg-slate-950/70 border border-amber-500/40 rounded-2xl p-4">
+              <h4 class="font-arcade text-amber-300 mb-1">Aturan Perkalian ("dan")</h4>
+              <p class="text-xs sm:text-sm text-slate-300">Digunakan untuk kejadian berurutan / bersamaan:</p>
+              <div class="mt-2 text-center font-semibold">$$k_1 \\times k_2 \\times \\dots \\times k_n$$</div>
+            </div>
+          </div>
+          <div class="bg-indigo-950/40 border border-indigo-500/40 rounded-2xl p-4 space-y-1">
+            <strong class="text-indigo-300">Contoh Singkat:</strong>
+            <p class="text-sm">Dari angka $1, 2, 3, 4, 5$, berapa banyak bilangan $3$ angka berbeda yang dapat dibentuk?</p>
+            <p class="text-sm text-emerald-300"><strong>Jawab:</strong> Kotak Ratusan ($5$ pilihan) $\\times$ Puluhan ($4$ pilihan) $\\times$ Satuan ($3$ pilihan) $= 5 \\times 4 \\times 3 = 60$ bilangan.</p>
+          </div>
+        `
+      },
+      {
+        title: "3. Notasi Faktorial & Permutasi (Urutan Diperhatikan)",
+        html: `
+          <p><strong>Faktorial</strong> dari bilangan asli $n$ didefinisikan sebagai $n! = n \\times (n-1) \\times (n-2) \\times \\dots \\times 1$, dengan kesepakatan $0! = 1$.</p>
+          <p><strong>Permutasi</strong> digunakan jika pertukaran urutan menghasilkan susunan yang <em>berbeda</em> (contoh: $AB \\neq BA$).</p>
+          <div class="space-y-2.5 bg-slate-950/70 border border-slate-700 rounded-2xl p-4">
+            <div><strong class="text-yellow-300">a. Permutasi $r$ unsur dari $n$ unsur berbeda:</strong> $$P(n, r) = \\frac{n!}{(n - r)!}$$</div>
+            <div><strong class="text-sky-300">b. Permutasi dengan unsur yang sama:</strong> $$P = \\frac{n!}{k_1! \\cdot k_2! \\cdot \\dots \\cdot k_m!}$$</div>
+            <div><strong class="text-fuchsia-300">c. Permutasi Siklis (melingkar):</strong> $$P_{\\text{siklis}} = (n - 1)!$$</div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300"><strong>Contoh:</strong> Memilih Ketua dan Sekretaris dari $5$ calon $\\Rightarrow P(5,2) = \\frac{5!}{3!} = 5 \\times 4 = 20$ cara.</p>
+        `
+      },
+      {
+        title: "4. Kombinasi & Jembatan Menuju Peluang Majemuk",
+        html: `
+          <p><strong>Kombinasi</strong> digunakan jika <strong>urutan tidak diperhatikan</strong> (contoh: memilih pasangan tim $\\{A, B\\}$ sama saja dengan $\\{B, A\\}$).</p>
+          <div class="bg-slate-950/70 border border-emerald-500/40 rounded-2xl p-4 text-center">
+            $$C(n, r) = \\binom{n}{r} = \\frac{n!}{r!(n - r)!}$$
+          </div>
+          <div class="bg-emerald-950/35 border border-emerald-500/40 rounded-2xl p-4 space-y-1.5">
+            <strong class="text-emerald-300">Jembatan ke Peluang Kejadian Majemuk:</strong>
+            <p class="text-sm">Sebuah kantong berisi $4$ bola merah dan $3$ bola biru. Jika diambil $2$ bola sekaligus, berapa peluang terambil $1$ merah dan $1$ biru?</p>
+            <ul class="list-disc pl-5 text-sm space-y-1">
+              <li>Banyak ruang sampel: $n(S) = C(7,2) = \\frac{7 \\times 6}{2} = 21$.</li>
+              <li>Banyak kejadian $A$: $n(A) = C(4,1) \\times C(3,1) = 4 \\times 3 = 12$.</li>
+              <li>Peluang: $P(A) = \\dfrac{n(A)}{n(S)} = \\dfrac{12}{21} = \\dfrac{4}{7}$.</li>
+            </ul>
+          </div>
+        `
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * 3. KONFIGURASI LEVEL & BANK SOAL (3 LEVEL × 15 SOAL = 45 SOAL UNIK)
+     *    DIACAK TANPA PENGULANGAN UNTUK 5 KELOMPOK BERGANTIAN
+     * =========================================================================
+     */
+    const LEVELS = [
+      {
+        id: 0,
+        name: "Level 1: Aturan Pengisian Tempat",
+        badge: "Level 1 • Aturan Pengisian Tempat",
+        ghostSpeed: 2.35,
+        formulaHtml: `
+          <div><strong class="text-sky-300">Aturan Penjumlahan (atau):</strong><br/> $k_1 + k_2 + \\dots + k_n$</div>
+          <div><strong class="text-yellow-300">Aturan Perkalian (dan):</strong><br/> $k_1 \\times k_2 \\times \\dots \\times k_n$</div>
+          <div class="text-xs text-slate-400">Tips: Buat kotak tempat (ratusan, puluhan, satuan), lalu isi banyak pilihan yang memenuhi syarat!</div>
+        `,
+        questions: [
+          {
+            topic: "Aturan Perkalian (Rute)",
+            q: "Dari kota $A$ ke kota $B$ terdapat $4$ jalan berbeda, dan dari kota $B$ ke kota $C$ terdapat $3$ jalan berbeda. Banyaknya cara seseorang pergi dari kota $A$ ke kota $C$ melalui kota $B$ adalah...",
+            options: ["$7$ cara", "$12$ cara", "$16$ cara", "$24$ cara"],
+            answer: 1,
+            explain: "Karena perjalanan $A \\to B$ <strong>dan</strong> $B \\to C$ dilakukan berurutan, gunakan aturan perkalian: $$4 \\times 3 = 12 \\text{ cara}$$"
+          },
+          {
+            topic: "Filling Slots (Angka Berbeda)",
+            q: "Tersedia angka-angka $1, 2, 3, 4, 5$. Banyaknya bilangan terdiri dari $3$ angka <strong>berbeda</strong> yang dapat disusun adalah...",
+            options: ["$125$", "$60$", "$20$", "$15$"],
+            answer: 1,
+            explain: "Siapkan $3$ kotak (Ratusan, Puluhan, Satuan). Karena angka harus berbeda: $$5 \\times 4 \\times 3 = 60 \\text{ bilangan}$$"
+          },
+          {
+            topic: "Filling Slots Bersyarat (> 400)",
+            q: "Dari angka $2, 3, 4, 5, 6$, akan dibentuk bilangan $3$ angka berbeda yang <strong>lebih besar dari $400$</strong>. Banyaknya bilangan yang mungkin adalah...",
+            options: ["$24$", "$36$", "$48$", "$60$"],
+            answer: 1,
+            explain: "Angka ratusan harus $\\ge 4$, yaitu $\\{4, 5, 6\\}$ ($3$ pilihan). Sisa angka untuk puluhan ada $4$, dan satuan ada $3$: $$3 \\times 4 \\times 3 = 36$$"
+          },
+          {
+            topic: "Sandi Loker",
+            q: "Sebuah sandi loker terdiri dari $2$ huruf vokal berbeda diikuti $1$ angka genap dari $\\{2, 4, 6, 8\\}$. Banyaknya susunan sandi yang dapat dibuat adalah...",
+            options: ["$40$", "$64$", "$80$", "$100$"],
+            answer: 2,
+            explain: "Huruf vokal ada $5$ ($A, I, U, E, O$). Huruf pertama: $5$, huruf kedua (berbeda): $4$, angka genap: $4$. Total: $$5 \\times 4 \\times 4 = 80$$"
+          },
+          {
+            topic: "Penjumlahan & Perkalian",
+            q: "Di lemari terdapat $3$ kemeja, $2$ kaus, dan $4$ celana panjang. Jika siswa memilih $1$ atasan (kemeja <em>atau</em> kaus) <strong>dan</strong> $1$ celana panjang, banyak setelan berbeda adalah...",
+            options: ["$9$", "$14$", "$20$", "$24$"],
+            answer: 2,
+            explain: "Banyak pilihan atasan (aturan penjumlahan): $3 + 2 = 5$. Kalikan dengan pilihan celana: $$5 \\times 4 = 20 \\text{ setelan}$$"
+          },
+          {
+            topic: "Angka Boleh Berulang",
+            q: "Dari angka-angka $1, 2, 3, 4$, akan dibentuk bilangan $3$ angka yang angkanya <strong>boleh berulang</strong>. Banyaknya bilangan yang terbentuk adalah...",
+            options: ["$12$", "$24$", "$48$", "$64$"],
+            answer: 3,
+            explain: "Karena angka boleh berulang, setiap kotak memiliki $4$ pilihan: $$4 \\times 4 \\times 4 = 64$$"
+          },
+          {
+            topic: "Bilangan Genap",
+            q: "Tersedia angka $1, 2, 3, 4, 5$. Banyaknya bilangan <strong>genap</strong> terdiri dari $3$ angka berbeda yang dapat disusun adalah...",
+            options: ["$12$", "$24$", "$30$", "$36$"],
+            answer: 1,
+            explain: "Isi kotak satuan dahulu agar genap: $\\{2, 4\\}$ ($2$ pilihan). Sisa $4$ angka untuk ratusan dan $3$ angka untuk puluhan: $$4 \\times 3 \\times 2 = 24$$"
+          },
+          {
+            topic: "Bilangan Ganjil",
+            q: "Dari angka $2, 3, 4, 5, 6, 7$, banyaknya bilangan <strong>ganjil</strong> terdiri dari $2$ angka berbeda yang dapat dibentuk adalah...",
+            options: ["$12$", "$15$", "$18$", "$30$"],
+            answer: 1,
+            explain: "Kotak satuan diisi angka ganjil $\\{3, 5, 7\\}$ ($3$ pilihan). Sisa $5$ angka untuk kotak puluhan: $$5 \\times 3 = 15$$"
+          },
+          {
+            topic: "Aturan Penjumlahan",
+            q: "Di parkiran sekolah terdapat $6$ sepeda motor, $4$ sepeda lipat, dan $2$ mobil. Banyaknya cara seorang guru memilih <strong>satu</strong> kendaraan untuk pulang adalah...",
+            options: ["$12$ cara", "$24$ cara", "$48$ cara", "$10$ cara"],
+            answer: 0,
+            explain: "Hanya memilih satu kendaraan (saling lepas / 'atau'), gunakan aturan penjumlahan: $$6 + 4 + 2 = 12 \\text{ cara}$$"
+          },
+          {
+            topic: "Menu Kantin",
+            q: "Kantin menyediakan $4$ jenis makanan berat, $3$ jenis minuman, dan $2$ jenis camilan. Banyaknya paket berisi $1$ makanan berat, $1$ minuman, dan $1$ camilan adalah...",
+            options: ["$9$", "$14$", "$24$", "$32$"],
+            answer: 2,
+            explain: "Ketiga jenis dipilih bersamaan ('dan'), gunakan aturan perkalian: $$4 \\times 3 \\times 2 = 24 \\text{ paket}$$"
+          },
+          {
+            topic: "Perjalanan Pulang-Pergi",
+            q: "Dari kota $P$ ke kota $Q$ ada $3$ jalur bus. Jika seseorang pergi dari $P$ ke $Q$ lalu pulang kembali ke $P$ dengan syarat <strong>tidak lewat jalur yang sama</strong>, banyaknya cara adalah...",
+            options: ["$5$", "$6$", "$9$", "$12$"],
+            answer: 1,
+            explain: "Pergi ada $3$ pilihan jalur, pulang tersisa $2$ jalur berbeda: $$3 \\times 2 = 6 \\text{ cara}$$"
+          },
+          {
+            topic: "Filling Slots (< 500)",
+            q: "Dari angka $1, 2, 4, 6, 8$, banyaknya bilangan $3$ angka berbeda yang nilainya <strong>kurang dari $500$</strong> adalah...",
+            options: ["$24$", "$36$", "$48$", "$60$"],
+            answer: 1,
+            explain: "Agar $< 500$, kotak ratusan hanya boleh diisi $\\{1, 2, 4\\}$ ($3$ pilihan). Sisa puluhan $4$ pilihan, satuan $3$ pilihan: $$3 \\times 4 \\times 3 = 36$$"
+          },
+          {
+            topic: "Kode PIN 3 Digit",
+            q: "PIN brankas terdiri dari $3$ angka berbeda yang dipilih dari $\\{0, 1, 2, 3, 4\\}$ dengan syarat <strong>angka pertama tidak boleh $0$</strong>. Banyaknya PIN yang mungkin adalah...",
+            options: ["$36$", "$48$", "$60$", "$100$"],
+            answer: 1,
+            explain: "Digit pertama: $4$ pilihan ($1,2,3,4$). Digit kedua: $4$ pilihan (termasuk $0$). Digit ketiga: $3$ pilihan. Total: $$4 \\times 4 \\times 3 = 48$$"
+          },
+          {
+            topic: "Kelipatan 5",
+            q: "Dari angka $1, 2, 3, 5, 6$, banyaknya bilangan $3$ angka berbeda yang <strong>habis dibagi $5$</strong> adalah...",
+            options: ["$6$", "$12$", "$20$", "$24$"],
+            answer: 1,
+            explain: "Agar habis dibagi $5$, angka satuan wajib $5$ ($1$ pilihan). Sisa $4$ angka untuk ratusan dan $3$ untuk puluhan: $$4 \\times 3 \\times 1 = 12$$"
+          },
+          {
+            topic: "Pelat Nomor Mini",
+            q: "Kode barang terdiri dari $1$ huruf dari $\\{A, B, C\\}$ diikuti $2$ angka <strong>boleh sama</strong> dari $\\{1, 2, 3, 4, 5\\}$. Banyaknya kode barang yang dapat dibuat adalah...",
+            options: ["$45$", "$60$", "$75$", "$125$"],
+            answer: 2,
+            explain: "Kotak huruf: $3$ pilihan. Angka pertama: $5$ pilihan, angka kedua (boleh sama): $5$ pilihan. Total: $$3 \\times 5 \\times 5 = 75$$"
+          }
+        ]
+      },
+      {
+        id: 1,
+        name: "Level 2: Permutasi",
+        badge: "Level 2 • Faktorial & Permutasi",
+        ghostSpeed: 2.65,
+        formulaHtml: `
+          <div><strong class="text-yellow-300">Permutasi Biasa:</strong> $P(n,r) = \\dfrac{n!}{(n-r)!}$</div>
+          <div><strong class="text-sky-300">Unsur Sama:</strong> $P = \\dfrac{n!}{k_1! \\cdot k_2! \\dots}$</div>
+          <div><strong class="text-fuchsia-300">Siklis (Melingkar):</strong> $P_{\\text{siklis}} = (n-1)!$</div>
+        `,
+        questions: [
+          {
+            topic: "Notasi Faktorial",
+            q: "Nilai dari bentuk faktorial $\\dfrac{7!}{5! \\cdot 2!}$ adalah...",
+            options: ["$14$", "$21$", "$35$", "$42$"],
+            answer: 1,
+            explain: "Jabarkan $7!$ sampai $5!$ agar dapat disederhanakan: $$\\frac{7 \\times 6 \\times 5!}{5! \\times 2 \\times 1} = \\frac{42}{2} = 21$$"
+          },
+          {
+            topic: "Permutasi Jabatan",
+            q: "Dari $6$ calon pengurus OSIS, akan dipilih seorang <strong>Ketua, Sekretaris, dan Bendahara</strong>. Banyaknya susunan pengurus yang mungkin adalah...",
+            options: ["$18$", "$20$", "$120$", "$216$"],
+            answer: 2,
+            explain: "Jabatan berbeda berarti <strong>urutan diperhatikan</strong> (Permutasi): $$P(6,3) = \\frac{6!}{(6-3)!} = 6 \\times 5 \\times 4 = 120$$"
+          },
+          {
+            topic: "Permutasi Unsur Sama",
+            q: "Banyaknya susunan huruf berbeda yang dapat dibentuk dari semua huruf pada kata <strong>\"MATA\"</strong> adalah...",
+            options: ["$6$", "$12$", "$18$", "$24$"],
+            answer: 1,
+            explain: "Ada $n = 4$ huruf dengan huruf <strong>A</strong> berulang $2$ kali: $$P = \\frac{4!}{2!} = \\frac{4 \\times 3 \\times 2!}{2!} = 12$$"
+          },
+          {
+            topic: "Permutasi Siklis",
+            q: "Sebanyak $5$ siswa duduk mengelilingi sebuah meja bundar untuk berdiskusi. Banyaknya susunan duduk melingkar yang berbeda adalah...",
+            options: ["$12$", "$24$", "$60$", "$120$"],
+            answer: 1,
+            explain: "Susunan melingkar menggunakan <strong>Permutasi Siklis</strong>: $$P_{\\text{siklis}} = (5 - 1)! = 4! = 4 \\times 3 \\times 2 \\times 1 = 24$$"
+          },
+          {
+            topic: "Permutasi Penuh",
+            q: "Empat buku berbeda (Matematika, Fisika, Kimia, Biologi) akan disusun berjajar pada sebuah rak. Banyaknya cara menyusunnya adalah...",
+            options: ["$8$", "$12$", "$16$", "$24$"],
+            answer: 3,
+            explain: "Menyusun $4$ objek berbeda pada $4$ posisi sekaligus: $$P(4,4) = 4! = 4 \\times 3 \\times 2 \\times 1 = 24$$"
+          },
+          {
+            topic: "Operasi Faktorial",
+            q: "Hasil dari $\\dfrac{8!}{6!} - 4!$ adalah...",
+            options: ["$24$", "$32$", "$40$", "$56$"],
+            answer: 1,
+            explain: "$\\dfrac{8!}{6!} = 8 \\times 7 = 56$ dan $4! = 24$. Maka: $$56 - 24 = 32$$"
+          },
+          {
+            topic: "Permutasi Peringkat Lomba",
+            q: "Dalam final lari yang diikuti $7$ pelari, akan diperebutkan <strong>Juara 1 dan Juara 2</strong>. Banyaknya kemungkinan susunan juara adalah...",
+            options: ["$14$", "$21$", "$42$", "$49$"],
+            answer: 2,
+            explain: "Juara 1 dan Juara 2 memperhatikan urutan: $$P(7,2) = \\frac{7!}{5!} = 7 \\times 6 = 42$$"
+          },
+          {
+            topic: "Permutasi Unsur Sama (KATAK)",
+            q: "Banyaknya susunan huruf berbeda yang dapat dibuat dari kata <strong>\"KATAK\"</strong> adalah...",
+            options: ["$20$", "$30$", "$60$", "$120$"],
+            answer: 1,
+            explain: "Total $n = 5$ huruf, dengan huruf K ada $2$ dan A ada $2$: $$P = \\frac{5!}{2! \\cdot 2!} = \\frac{120}{4} = 30$$"
+          },
+          {
+            topic: "Permutasi Unsur Sama (KAKAK)",
+            q: "Banyaknya susunan huruf berbeda dari kata <strong>\"KAKAK\"</strong> adalah...",
+            options: ["$10$", "$15$", "$20$", "$30$"],
+            answer: 0,
+            explain: "Total $n = 5$ huruf, huruf K ada $3$ dan A ada $2$: $$P = \\frac{5!}{3! \\cdot 2!} = \\frac{5 \\times 4}{2} = 10$$"
+          },
+          {
+            topic: "Permutasi Siklis (6 Orang)",
+            q: "Enam anggota keluarga duduk mengelilingi meja makan bundar. Banyaknya formasi duduk melingkar yang berbeda adalah...",
+            options: ["$60$", "$120$", "$360$", "$720$"],
+            answer: 1,
+            explain: "Gunakan permutasi siklis untuk $n = 6$: $$P_{\\text{siklis}} = (6 - 1)! = 5! = 120$$"
+          },
+          {
+            topic: "Permutasi dengan Syarat Berdampingan",
+            q: "Ayah, Ibu, dan $2$ anaknya berfoto berjajar dalam satu baris. Jika <strong>Ayah dan Ibu selalu berdampingan</strong>, banyaknya susunan foto adalah...",
+            options: ["$6$", "$12$", "$18$", "$24$"],
+            answer: 1,
+            explain: "Anggap (Ayah, Ibu) sebagai $1$ kesatuan, jadi ada $3$ objek $\\Rightarrow 3! = 6$. Ayah & Ibu bisa bertukar posisi $2! = 2$. Total: $$3! \\times 2! = 6 \\times 2 = 12$$"
+          },
+          {
+            topic: "Menyusun Bendera Identik",
+            q: "Tersedia $3$ bendera merah identik dan $2$ bendera putih identik yang akan dipasang berjajar pada $5$ tiang. Banyaknya formasi bendera yang berbeda adalah...",
+            options: ["$10$", "$15$", "$20$", "$60$"],
+            answer: 0,
+            explain: "Permutasi unsur sama dengan $n = 5$, merah $= 3$, putih $= 2$: $$P = \\frac{5!}{3! \\cdot 2!} = 10$$"
+          },
+          {
+            topic: "Persamaan Permutasi",
+            q: "Jika diketahui $P(n, 2) = 30$, maka nilai bilangan asli $n$ yang memenuhi adalah...",
+            options: ["$5$", "$6$", "$7$", "$8$"],
+            answer: 1,
+            explain: "$P(n,2) = n(n-1) = 30$. Karena $6 \\times 5 = 30$, maka: $$n = 6$$"
+          },
+          {
+            topic: "Permutasi Baris (5 Siswa)",
+            q: "Lima siswa antre di depan loket perpustakaan. Banyaknya urutan antrean berbeda yang mungkin terjadi adalah...",
+            options: ["$25$", "$60$", "$120$", "$240$"],
+            answer: 2,
+            explain: "Menyusun $5$ orang berbeda secara berjajar: $$P(5,5) = 5! = 5 \\times 4 \\times 3 \\times 2 \\times 1 = 120$$"
+          },
+          {
+            topic: "Permutasi Unsur Sama (BOLA)",
+            q: "Banyaknya susunan huruf berbeda dari kata <strong>\"SISWA\"</strong> adalah...",
+            options: ["$30$", "$40$", "$60$", "$120$"],
+            answer: 2,
+            explain: "Ada $n = 5$ huruf dengan huruf <strong>S</strong> berulang $2$ kali: $$P = \\frac{5!}{2!} = \\frac{120}{2} = 60$$"
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Level 3: Kombinasi & Peluang Majemuk",
+        badge: "Level 3 • Kombinasi & Pengantar Peluang",
+        ghostSpeed: 2.9,
+        formulaHtml: `
+          <div><strong class="text-emerald-300">Kombinasi (Urutan Bebas):</strong><br/> $C(n,r) = \\dfrac{n!}{r!(n-r)!}$</div>
+          <div><strong class="text-yellow-300">Peluang Kejadian:</strong> $P(A) = \\dfrac{n(A)}{n(S)}$</div>
+          <div class="text-xs text-slate-400">Tips: Pengambilan bola sekaligus memakai Kombinasi!</div>
+        `,
+        questions: [
+          {
+            topic: "Kombinasi Tim",
+            q: "Dari $7$ siswa, akan dipilih $3$ siswa untuk menjadi tim perwakilan lomba tanpa membedakan jabatan. Banyaknya cara memilih tim tersebut adalah...",
+            options: ["$21$", "$35$", "$42$", "$210$"],
+            answer: 1,
+            explain: "Karena urutan tidak diperhatikan, gunakan <strong>Kombinasi</strong>: $$C(7,3) = \\frac{7!}{3!4!} = \\frac{7 \\times 6 \\times 5}{3 \\times 2 \\times 1} = 35$$"
+          },
+          {
+            topic: "Aplikasi Jabat Tangan",
+            q: "Dalam sebuah rapat terdapat $8$ orang yang semuanya saling berjabat tangan satu sama lain tepat satu kali. Banyaknya jabat tangan yang terjadi adalah...",
+            options: ["$16$", "$28$", "$56$", "$64$"],
+            answer: 1,
+            explain: "Satu jabat tangan melibatkan $2$ orang tanpa memperhatikan urutan: $$C(8,2) = \\frac{8!}{2!6!} = \\frac{8 \\times 7}{2} = 28$$"
+          },
+          {
+            topic: "Persiapan n(A) Peluang Majemuk",
+            q: "Sebuah kantong berisi $5$ bola merah dan $4$ bola biru. Jika diambil $2$ bola sekaligus, banyaknya cara terambil $1$ merah <strong>dan</strong> $1$ biru adalah...",
+            options: ["$9$", "$18$", "$20$", "$36$"],
+            answer: 2,
+            explain: "Kombinasikan pemilihan tiap warna lalu kalikan: $$C(5,1) \\times C(4,1) = 5 \\times 4 = 20$$"
+          },
+          {
+            topic: "Menentukan Ruang Sampel n(S)",
+            q: "Dari $6$ bola hijau dan $4$ bola kuning di dalam kotak, diambil $2$ bola sekaligus. Banyaknya seluruh ruang sampel $n(S)$ adalah...",
+            options: ["$20$", "$24$", "$45$", "$90$"],
+            answer: 2,
+            explain: "Total bola $n = 6 + 4 = 10$. Mengambil $2$ bola sekaligus: $$n(S) = C(10,2) = \\frac{10 \\times 9}{2 \\times 1} = 45$$"
+          },
+          {
+            topic: "Jembatan Peluang Majemuk",
+            q: "Kotak berisi $4$ kelereng merah dan $3$ kelereng putih. Diambil $2$ kelereng sekaligus. Peluang terambil <strong>keduanya merah</strong> adalah...",
+            options: ["$\\dfrac{1}{7}$", "$\\dfrac{2}{7}$", "$\\dfrac{3}{7}$", "$\\dfrac{4}{7}$"],
+            answer: 1,
+            explain: "$n(A) = C(4,2) = 6$ dan $n(S) = C(7,2) = 21$. Maka peluangnya: $$P(A) = \\frac{n(A)}{n(S)} = \\frac{6}{21} = \\frac{2}{7}$$"
+          },
+          {
+            topic: "Memilih Soal Ujian",
+            q: "Seorang siswa diminta mengerjakan $5$ soal dari $8$ soal yang tersedia. Banyaknya cara memilih soal yang akan dikerjakan adalah...",
+            options: ["$40$", "$56$", "$70$", "$112$"],
+            answer: 1,
+            explain: "Urutan pengerjaan tidak mengubah pilihan soal: $$C(8,5) = C(8,3) = \\frac{8 \\times 7 \\times 6}{3 \\times 2 \\times 1} = 56$$"
+          },
+          {
+            topic: "Soal Ujian dengan Syarat Wajib",
+            q: "Dari $7$ soal, siswa wajib mengerjakan $4$ soal, tetapi <strong>soal nomor 1 wajib dikerjakan</strong>. Banyaknya cara memilih soal adalah...",
+            options: ["$15$", "$20$", "$35$", "$42$"],
+            answer: 1,
+            explain: "Soal nomor 1 sudah pasti dipilih, sehingga tinggal memilih $3$ soal lagi dari $6$ soal tersisa: $$C(6,3) = \\frac{6 \\times 5 \\times 4}{6} = 20$$"
+          },
+          {
+            topic: "Tim Putra & Putri",
+            q: "Dari $4$ siswa putra dan $5$ siswa putri, akan dibentuk tim beranggotakan $2$ putra <strong>dan</strong> $2$ putri. Banyaknya cara membentuk tim tersebut adalah...",
+            options: ["$16$", "$30$", "$60$", "$120$"],
+            answer: 2,
+            explain: "Hitung masing-masing kombinasi lalu kalikan: $$C(4,2) \\times C(5,2) = 6 \\times 10 = 60$$"
+          },
+          {
+            topic: "Geometri & Kombinasi",
+            q: "Terdapat $6$ titik pada keliling sebuah lingkaran. Banyaknya segitiga berbeda yang dapat dibuat dengan menghubungkan titik-titik tersebut adalah...",
+            options: ["$12$", "$15$", "$20$", "$30$"],
+            answer: 2,
+            explain: "Satu segitiga dibentuk dari $3$ titik tanpa memperhatikan urutan: $$C(6,3) = \\frac{6 \\times 5 \\times 4}{3 \\times 2 \\times 1} = 20$$"
+          },
+          {
+            topic: "Peluang 1 Merah & 1 Putih",
+            q: "Di dalam tas terdapat $3$ bola merah dan $2$ bola putih. Diambil $2$ bola sekaligus. Peluang terambil $1$ merah dan $1$ putih adalah...",
+            options: ["$\\dfrac{2}{5}$", "$\\dfrac{3}{5}$", "$\\dfrac{3}{10}$", "$\\dfrac{1}{2}$"],
+            answer: 1,
+            explain: "$n(A) = C(3,1) \\cdot C(2,1) = 6$ dan $n(S) = C(5,2) = 10$. Maka: $$P(A) = \\frac{6}{10} = \\frac{3}{5}$$"
+          },
+          {
+            topic: "Kombinasi Ganda Campuran",
+            q: "Sebuah klub bulu tangkis memiliki $5$ pemain putra dan $3$ pemain putri. Banyaknya pasangan <strong>ganda campuran</strong> ($1$ putra & $1$ putri) yang dapat dibentuk adalah...",
+            options: ["$8$", "$15$", "$20$", "$30$"],
+            answer: 1,
+            explain: "Pilih $1$ putra dari $5$ dan $1$ putri dari $3$: $$C(5,1) \\times C(3,1) = 5 \\times 3 = 15$$"
+          },
+          {
+            topic: "Peluang Keduanya Biru",
+            q: "Kotak berisi $3$ bola biru dan $3$ bola kuning. Jika diambil $2$ bola sekaligus, peluang terambil <strong>keduanya biru</strong> adalah...",
+            options: ["$\\dfrac{1}{5}$", "$\\dfrac{1}{4}$", "$\\dfrac{1}{3}$", "$\\dfrac{2}{5}$"],
+            answer: 0,
+            explain: "$n(A) = C(3,2) = 3$ dan $n(S) = C(6,2) = 15$. Maka: $$P(A) = \\frac{3}{15} = \\frac{1}{5}$$"
+          },
+          {
+            topic: "Menghitung Nilai Kombinasi",
+            q: "Nilai dari $C(9, 2)$ adalah...",
+            options: ["$18$", "$36$", "$72$", "$81$"],
+            answer: 1,
+            explain: "Gunakan rumus kombinasi: $$C(9,2) = \\frac{9!}{2!7!} = \\frac{9 \\times 8}{2} = 36$$"
+          },
+          {
+            topic: "Pertandingan Liga",
+            q: "Sebanyak $6$ tim basket mengikuti turnamen di mana setiap tim bertanding melawan semua tim lain tepat satu kali. Total pertandingan yang terjadi adalah...",
+            options: ["$12$", "$15$", "$30$", "$36$"],
+            answer: 1,
+            explain: "Satu pertandingan mempertemukan $2$ tim tanpa memperhatikan urutan: $$C(6,2) = \\frac{6 \\times 5}{2} = 15$$"
+          },
+          {
+            topic: "Peluang Terambil 2 Bola Sama Warna",
+            q: "Kantong berisi $3$ bola merah dan $2$ bola biru. Diambil $2$ bola sekaligus. Peluang terambil <strong>keduanya berwarna sama</strong> adalah...",
+            options: ["$\\dfrac{1}{5}$", "$\\dfrac{2}{5}$", "$\\dfrac{3}{5}$", "$\\dfrac{4}{10}$"],
+            answer: 1,
+            explain: "Keduanya merah: $C(3,2) = 3$. Keduanya biru: $C(2,2) = 1$. Total $n(A) = 3 + 1 = 4$, $n(S) = C(5,2) = 10$: $$P(A) = \\frac{4}{10} = \\frac{2}{5}$$"
+          }
+        ]
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * 3B. MANAJEMEN 5 KELOMPOK & DEK SOAL ACAK TANPA PENGULANGAN
+     * =========================================================================
+     */
+    const TEAMS = [
+      { id: 0, name: "Kelompok 1", icon: "🔴", badgeClass: "text-rose-300",    score: 0, correct: 0, totalQ: 0, turns: 0 },
+      { id: 1, name: "Kelompok 2", icon: "🔵", badgeClass: "text-sky-300",     score: 0, correct: 0, totalQ: 0, turns: 0 },
+      { id: 2, name: "Kelompok 3", icon: "🟢", badgeClass: "text-emerald-300", score: 0, correct: 0, totalQ: 0, turns: 0 },
+      { id: 3, name: "Kelompok 4", icon: "🟡", badgeClass: "text-amber-300",   score: 0, correct: 0, totalQ: 0, turns: 0 },
+      { id: 4, name: "Kelompok 5", icon: "🟣", badgeClass: "text-fuchsia-300", score: 0, correct: 0, totalQ: 0, turns: 0 }
+    ];
+
+    // Menyimpan dek indeks soal yang tersisa agar 5 kelompok bergantian mendapat soal berbeda
+    const questionDecks = { 0: [], 1: [], 2: [] };
+    let resetConfirmPending = false;
+
+    function drawUniqueQuestions(levelIdx, count = 4) {
+      const pool = LEVELS[levelIdx].questions;
+      const chosenIndices = [];
+
+      while (chosenIndices.length < count) {
+        if (questionDecks[levelIdx].length === 0) {
+          // Kocok ulang semua indeks soal level ini
+          const fresh = pool.map((_, idx) => idx);
+          questionDecks[levelIdx] = shuffleArray(fresh);
+        }
+        const nextIdx = questionDecks[levelIdx].pop();
+        // Cegah duplikat dalam satu sesi 4 soal
+        if (!chosenIndices.includes(nextIdx)) {
+          chosenIndices.push(nextIdx);
+        }
+      }
+
+      // Acak juga urutan opsi A, B, C, D untuk setiap soal agar tidak dihafal posisinya
+      return chosenIndices.map(idx => {
+        const orig = pool[idx];
+        const mappedOpts = orig.options.map((text, i) => ({ text, isCorrect: i === orig.answer }));
+        const shuffledOpts = shuffleArray(mappedOpts);
+        return {
+          topic: orig.topic,
+          q: orig.q,
+          options: shuffledOpts.map(o => o.text),
+          answer: shuffledOpts.findIndex(o => o.isCorrect),
+          explain: orig.explain
+        };
+      });
+    }
+
+    /**
+     * =========================================================================
+     * 4. ENGINE GIM PAC-MAN (GRID 15×11, GERAK HALUS, AI HANTU, KONTROL PENUH)
+     * =========================================================================
+     */
+    // Kode Peta: 1=Dinding, 0=Titik, 2=Kosong/Gerbang, 3=Orb Soal, 4=Rumah Hantu
+    const BASE_MAZE = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,0,0,0,1,0,0,0,0,0,3,1],
+      [1,0,1,1,0,1,0,1,0,1,0,1,1,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,0,1,1,2,1,1,0,1,1,0,1],
+      [0,0,0,0,0,1,4,4,4,1,0,0,0,0,0],
+      [1,0,1,1,0,1,1,1,1,1,0,1,1,0,1],
+      [1,0,0,0,0,0,0,2,0,0,0,0,0,0,1],
+      [1,0,1,1,0,1,0,1,0,1,0,1,1,0,1],
+      [1,3,0,0,0,1,0,0,0,1,0,0,0,3,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    const COLS = 15;
+    const ROWS = 11;
+
+    const DIRS = {
+      UP:    { x: 0,  y: -1, angle: -Math.PI / 2 },
+      DOWN:  { x: 0,  y: 1,  angle: Math.PI / 2 },
+      LEFT:  { x: -1, y: 0,  angle: Math.PI },
+      RIGHT: { x: 1,  y: 0,  angle: 0 },
+      NONE:  { x: 0,  y: 0,  angle: 0 }
+    };
+
+    const OPPOSITE = { UP: 'DOWN', DOWN: 'UP', LEFT: 'RIGHT', RIGHT: 'LEFT', NONE: 'NONE' };
+
+    // State Gim Global
+    const state = {
+      levelIdx: 0,
+      activeTeamIdx: 0,
+      status: 'READY', // READY | PLAYING | PAUSED | QUESTION | WON | GAMEOVER
+      score: 0,
+      lives: 3,
+      orbsSolved: 0,
+      correctCount: 0,
+      superTimer: 0, // dalam detik
+      invulTimer: 0, // kebal sesaat setelah kena hantu
+      maze: [],
+      levelQuestions: [],
+      activeQuestion: null,
+      pacman: null,
+      ghosts: [],
+      floatingTexts: [],
+      animTime: 0
+    };
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const canvasContainer = document.getElementById('canvasContainer');
+
+    let tileSize = 40;
+    let lastTimestamp = 0;
+
+    // Mengacak array untuk variasi soal tiap sesi
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // Inisialisasi Level
+    function initLevel(levelIdx, keepScore = false) {
+      state.levelIdx = levelIdx;
+      const lvl = LEVELS[levelIdx];
+      const team = TEAMS[state.activeTeamIdx];
+      document.getElementById('levelSelector').value = String(levelIdx);
+      document.getElementById('teamSelector').value = String(state.activeTeamIdx);
+
+      if (!keepScore) {
+        state.score = 0;
+        state.lives = 3;
+      }
+      state.orbsSolved = 0;
+      state.correctCount = 0;
+      state.superTimer = 0;
+      state.invulTimer = 0;
+      state.floatingTexts = [];
+      state.maze = BASE_MAZE.map(row => [...row]);
+      state.levelQuestions = drawUniqueQuestions(levelIdx, 4);
+
+      resetEntities();
+      state.status = 'READY';
+
+      // Perbarui Kartu Rumus & Overlay
+      const formulaBox = document.getElementById('quickFormulaBox');
+      formulaBox.innerHTML = lvl.formulaHtml;
+      renderMath(formulaBox);
+
+      document.getElementById('overlayTeamBadge').textContent = `${team.icon} Giliran: ${team.name}`;
+      document.getElementById('overlayLevelBadge').textContent = lvl.badge;
+      document.getElementById('overlayTitle').textContent = lvl.name;
+      document.getElementById('overlayDesc').innerHTML =
+        `Arahkan Pac-Man memakan <strong class="text-fuchsia-300">4 Bola Soal Bercahaya</strong> di sudut labirin. Jawab benar untuk mengaktifkan <strong class="text-amber-300">Mode Super</strong>!`;
+      document.getElementById('overlayDeckInfo').textContent =
+        `🎲 4 soal acak baru dipilih dari ${lvl.questions.length} bank soal (sisa belum tampil: ${questionDecks[levelIdx].length} soal)`;
+      document.getElementById('btnStartGame').textContent = '▶ MULAI BERMAIN';
+      document.getElementById('canvasOverlay').classList.remove('hidden');
+
+      updateHUD();
+      draw();
+    }
+
+    // Reset Posisi Pac-Man dan Hantu
+    function resetEntities() {
+      state.pacman = {
+        x: 7,
+        y: 7,
+        dir: 'LEFT',
+        nextDir: 'LEFT',
+        speed: 4.1, // tile per detik
+        mouthPhase: 0
+      };
+
+      const gSpeed = LEVELS[state.levelIdx].ghostSpeed;
+      state.ghosts = [
+        { name: 'Blinky', x: 7, y: 3, dir: 'LEFT',  color: '#ef4444', speed: gSpeed, inHouse: false, eaten: false },
+        { name: 'Pinky',  x: 6, y: 5, dir: 'RIGHT', color: '#f472b6', speed: gSpeed * 0.95, inHouse: true, eaten: false },
+        { name: 'Inky',   x: 7, y: 5, dir: 'UP',    color: '#22d3ee', speed: gSpeed * 0.92, inHouse: true, eaten: false },
+        { name: 'Clyde',  x: 8, y: 5, dir: 'LEFT',  color: '#fb923c', speed: gSpeed * 0.9,  inHouse: true, eaten: false }
+      ];
+    }
+
+    function canMoveTile(col, row, allowHouse = false) {
+      // Terowongan kiri-kanan pada baris 5
+      if (row === 5 && (col < 0 || col >= COLS)) return true;
+      if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return false;
+      const cell = state.maze[row][col];
+      if (cell === 1) return false;
+      if (!allowHouse && (cell === 4 || (row === 4 && col === 7))) return false;
+      return true;
+    }
+
+    // Menggerakkan entitas (Pac-Man / Hantu) secara mulus berbasis grid
+    function moveEntity(ent, dt, isGhost = false) {
+      const speed = isGhost && state.superTimer > 0 ? ent.speed * 0.62 : ent.speed;
+      const step = speed * dt;
+
+      // Khusus Pac-Man: izinkan balik arah 180 derajat secara instan agar responsif
+      if (!isGhost && ent.nextDir !== 'NONE' && ent.nextDir === OPPOSITE[ent.dir]) {
+        ent.dir = ent.nextDir;
+      }
+
+      const d = DIRS[ent.dir];
+      const nextX = ent.x + d.x * step;
+      const nextY = ent.y + d.y * step;
+
+      // Deteksi melewati titik pusat tile
+      const curCol = Math.round(ent.x);
+      const curRow = Math.round(ent.y);
+
+      const crossedCenter =
+        (d.x > 0 && ent.x <= curCol && nextX >= curCol) ||
+        (d.x < 0 && ent.x >= curCol && nextX <= curCol) ||
+        (d.y > 0 && ent.y <= curRow && nextY >= curRow) ||
+        (d.y < 0 && ent.y >= curRow && nextY <= curRow) ||
+        (ent.dir === 'NONE');
+
+      if (crossedCenter) {
+        ent.x = curCol;
+        ent.y = curRow;
+
+        if (!isGhost) {
+          // Coba belok ke nextDir jika memungkinkan
+          const nd = DIRS[ent.nextDir];
+          if (ent.nextDir !== 'NONE' && canMoveTile(curCol + nd.x, curRow + nd.y, false)) {
+            ent.dir = ent.nextDir;
+          }
+          // Jika arah sekarang terhalang dinding, berhenti rapi di pusat tile
+          const cd = DIRS[ent.dir];
+          if (!canMoveTile(curCol + cd.x, curRow + cd.y, false)) {
+            return;
+          }
+        } else {
+          // AI Hantu saat berada di pusat tile
+          chooseGhostDirection(ent, curCol, curRow);
+        }
+      }
+
+      const finalD = DIRS[ent.dir];
+      const fx = ent.x + finalD.x * step;
+      const fy = ent.y + finalD.y * step;
+
+      // Cek jangan sampai menembus dinding saat tepat di tepi
+      const targetCol = Math.round(ent.x + finalD.x * 0.51);
+      const targetRow = Math.round(ent.y + finalD.y * 0.51);
+      if (canMoveTile(targetCol, targetRow, isGhost && ent.inHouse)) {
+        ent.x = fx;
+        ent.y = fy;
+      } else {
+        ent.x = curCol;
+        ent.y = curRow;
+        if (isGhost) chooseGhostDirection(ent, curCol, curRow);
+      }
+
+      // Wrap-around terowongan baris 5
+      if (ent.x < -0.45) ent.x = COLS - 0.55;
+      if (ent.x > COLS - 0.55) ent.x = -0.45;
+    }
+
+    // AI Sederhana namun seru untuk Hantu
+    function chooseGhostDirection(g, col, row) {
+      // Keluar dari rumah hantu secara terarah
+      if (g.inHouse) {
+        if (row === 5 && col < 7) { g.dir = 'RIGHT'; return; }
+        if (row === 5 && col > 7) { g.dir = 'LEFT'; return; }
+        if (col === 7 && row > 3) { g.dir = 'UP'; return; }
+        g.inHouse = false;
+      }
+
+      const candidates = ['UP', 'DOWN', 'LEFT', 'RIGHT'].filter(dirName => {
+        if (dirName === OPPOSITE[g.dir]) return false;
+        const d = DIRS[dirName];
+        return canMoveTile(col + d.x, row + d.y, false);
+      });
+
+      if (candidates.length === 0) {
+        g.dir = OPPOSITE[g.dir];
+        return;
+      }
+
+      // Jika Mode Super aktif, hantu cenderung menjauh dari Pac-Man
+      if (state.superTimer > 0) {
+        candidates.sort((a, b) => {
+          const da = Math.hypot((col + DIRS[a].x) - state.pacman.x, (row + DIRS[a].y) - state.pacman.y);
+          const db = Math.hypot((col + DIRS[b].x) - state.pacman.x, (row + DIRS[b].y) - state.pacman.y);
+          return db - da;
+        });
+        g.dir = Math.random() < 0.75 ? candidates[0] : candidates[Math.floor(Math.random() * candidates.length)];
+      } else {
+        // 55% mengejar Pac-Man, 45% acak agar ramah untuk siswa di kelas
+        if (Math.random() < 0.55) {
+          candidates.sort((a, b) => {
+            const da = Math.hypot((col + DIRS[a].x) - state.pacman.x, (row + DIRS[a].y) - state.pacman.y);
+            const db = Math.hypot((col + DIRS[b].x) - state.pacman.x, (row + DIRS[b].y) - state.pacman.y);
+            return da - db;
+          });
+          g.dir = candidates[0];
+        } else {
+          g.dir = candidates[Math.floor(Math.random() * candidates.length)];
+        }
+      }
+    }
+
+    function addFloatingText(text, x, y, color = '#facc15') {
+      state.floatingTexts.push({ text, x, y, color, life: 1.0 });
+    }
+
+    // Pembaruan Logika Gim per Frame
+    function update(dt) {
+      state.animTime += dt;
+      if (state.status !== 'PLAYING') return;
+
+      if (state.superTimer > 0) {
+        state.superTimer = Math.max(0, state.superTimer - dt);
+        updateSuperBar();
+      }
+      if (state.invulTimer > 0) {
+        state.invulTimer = Math.max(0, state.invulTimer - dt);
+      }
+
+      // Gerakkan Pac-Man
+      state.pacman.mouthPhase += dt * 12;
+      moveEntity(state.pacman, dt, false);
+
+      // Cek Makan Titik atau Orb Soal
+      const pCol = Math.round(state.pacman.x);
+      const pRow = Math.round(state.pacman.y);
+      if (pRow >= 0 && pRow < ROWS && pCol >= 0 && pCol < COLS) {
+        const cell = state.maze[pRow][pCol];
+        if (cell === 0) {
+          state.maze[pRow][pCol] = 2;
+          state.score += 10;
+          SoundFX.chomp();
+          updateHUD();
+        } else if (cell === 3) {
+          state.maze[pRow][pCol] = 2;
+          SoundFX.orb();
+          triggerQuestion();
+          return;
+        }
+      }
+
+      // Gerakkan Hantu & Cek Tabrakan
+      for (const g of state.ghosts) {
+        moveEntity(g, dt, true);
+        const dist = Math.hypot(g.x - state.pacman.x, g.y - state.pacman.y);
+        if (dist < 0.62) {
+          if (state.superTimer > 0) {
+            // Pac-Man memakan hantu!
+            SoundFX.eatGhost();
+            state.score += 200;
+            addFloatingText('+200', g.x, g.y, '#38bdf8');
+            g.x = 7;
+            g.y = 5;
+            g.dir = 'UP';
+            g.inHouse = true;
+            updateHUD();
+          } else if (state.invulTimer <= 0) {
+            // Pac-Man tertangkap hantu
+            SoundFX.hurt();
+            state.lives -= 1;
+            updateHUD();
+            if (state.lives <= 0) {
+              showResultModal(false);
+            } else {
+              state.invulTimer = 2.4;
+              state.pacman.x = 7;
+              state.pacman.y = 7;
+              state.pacman.dir = 'LEFT';
+              state.pacman.nextDir = 'LEFT';
+              addFloatingText('Awas Hantu!', 7, 6.5, '#f87171');
+            }
+            return;
+          }
+        }
+      }
+
+      // Update teks melayang
+      state.floatingTexts.forEach(ft => {
+        ft.y -= dt * 0.9;
+        ft.life -= dt;
+      });
+      state.floatingTexts = state.floatingTexts.filter(ft => ft.life > 0);
+    }
+
+    /**
+     * =========================================================================
+     * 5. RENDERING KANVAS (ESTETIKA NEON ARCADE RAMAH PAPAN INTERAKTIF)
+     * =========================================================================
+     */
+    function resizeCanvas() {
+      const rect = canvasContainer.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(300, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(220, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      tileSize = Math.min(rect.width / COLS, rect.height / ROWS);
+      draw();
+    }
+
+    function draw() {
+      const rect = canvasContainer.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      const offsetX = (width - COLS * tileSize) / 2;
+      const offsetY = (height - ROWS * tileSize) / 2;
+
+      // Latar Belakang Labirin
+      ctx.fillStyle = '#060a14';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+
+      // 1. Gambar Dinding, Titik, dan Orb Soal
+      const orbSymbols = ['×', '!', 'P', 'C'];
+      let orbIdx = 0;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const val = state.maze[r][c];
+          const px = c * tileSize;
+          const py = r * tileSize;
+
+          if (val === 1) {
+            // Dinding Labirin Neon
+            const pad = tileSize * 0.1;
+            const rad = tileSize * 0.22;
+            ctx.fillStyle = '#0f2942';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = Math.max(1.5, tileSize * 0.055);
+            roundRect(ctx, px + pad, py + pad, tileSize - pad * 2, tileSize - pad * 2, rad);
+            ctx.fill();
+            ctx.stroke();
+          } else if (val === 0) {
+            // Titik Poin
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(px + tileSize / 2, py + tileSize / 2, tileSize * 0.11, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (val === 3) {
+            // Bola Soal Kombinatorika Bercahaya (Berdenyut)
+            const pulse = 1 + Math.sin(state.animTime * 5 + c) * 0.14;
+            const cx = px + tileSize / 2;
+            const cy = py + tileSize / 2;
+
+            const grad = ctx.createRadialGradient(cx, cy, tileSize * 0.05, cx, cy, tileSize * 0.42 * pulse);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.45, '#e879f9');
+            grad.addColorStop(1, 'rgba(168, 85, 247, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, tileSize * 0.42 * pulse, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Simbol Matematika di dalam Orb
+            ctx.fillStyle = '#3b0764';
+            ctx.font = `700 ${Math.floor(tileSize * 0.36)}px Fredoka, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(orbSymbols[orbIdx % orbSymbols.length], cx, cy + 1);
+            orbIdx++;
+          } else if (r === 4 && c === 7) {
+            // Gerbang Rumah Hantu
+            ctx.strokeStyle = '#f472b6';
+            ctx.lineWidth = Math.max(2, tileSize * 0.08);
+            ctx.beginPath();
+            ctx.moveTo(px + 2, py + tileSize / 2);
+            ctx.lineTo(px + tileSize - 2, py + tileSize / 2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // 2. Gambar Pac-Man
+      if (state.pacman) {
+        const p = state.pacman;
+        const blink = state.invulTimer > 0 && Math.floor(state.animTime * 14) % 2 === 0;
+        if (!blink) {
+          const cx = (p.x + 0.5) * tileSize;
+          const cy = (p.y + 0.5) * tileSize;
+          const radius = tileSize * 0.4;
+          const mouth = 0.08 + Math.abs(Math.sin(p.mouthPhase)) * 0.28;
+          const rot = DIRS[p.dir].angle;
+
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(rot);
+
+          // Efek aura jika Mode Super aktif
+          if (state.superTimer > 0) {
+            ctx.shadowColor = '#facc15';
+            ctx.shadowBlur = 16;
+          }
+
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.arc(0, 0, radius, mouth * Math.PI, (2 - mouth) * Math.PI);
+          ctx.closePath();
+          ctx.fill();
+
+          // Mata Pac-Man
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.arc(radius * 0.15, -radius * 0.45, radius * 0.13, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 3. Gambar Hantu-Hantu
+      for (const g of state.ghosts) {
+        const cx = (g.x + 0.5) * tileSize;
+        const cy = (g.y + 0.5) * tileSize;
+        const r = tileSize * 0.38;
+        const frightened = state.superTimer > 0;
+        const flashWhite = frightened && state.superTimer < 2.2 && Math.floor(state.animTime * 10) % 2 === 0;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.fillStyle = frightened ? (flashWhite ? '#e2e8f0' : '#2563eb') : g.color;
+
+        // Tubuh Hantu
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.15, r, Math.PI, 0, false);
+        ctx.lineTo(r, r * 0.85);
+        // Kaki bergelombang
+        const wave = Math.sin(state.animTime * 10) * (r * 0.1);
+        ctx.lineTo(r * 0.5, r * 0.55 + wave);
+        ctx.lineTo(0, r * 0.85 - wave);
+        ctx.lineTo(-r * 0.5, r * 0.55 + wave);
+        ctx.lineTo(-r, r * 0.85);
+        ctx.closePath();
+        ctx.fill();
+
+        // Mata Hantu
+        if (frightened) {
+          ctx.fillStyle = flashWhite ? '#1e3a8a' : '#fef08a';
+          ctx.beginPath();
+          ctx.arc(-r * 0.32, -r * 0.15, r * 0.14, 0, Math.PI * 2);
+          ctx.arc(r * 0.32, -r * 0.15, r * 0.14, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(-r * 0.32, -r * 0.18, r * 0.24, 0, Math.PI * 2);
+          ctx.arc(r * 0.32, -r * 0.18, r * 0.24, 0, Math.PI * 2);
+          ctx.fill();
+
+          const d = DIRS[g.dir];
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.arc(-r * 0.32 + d.x * r * 0.09, -r * 0.18 + d.y * r * 0.09, r * 0.12, 0, Math.PI * 2);
+          ctx.arc(r * 0.32 + d.x * r * 0.09, -r * 0.18 + d.y * r * 0.09, r * 0.12, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // 4. Teks Skor Melayang
+      for (const ft of state.floatingTexts) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, ft.life);
+        ctx.fillStyle = ft.color;
+        ctx.font = `700 ${Math.floor(tileSize * 0.42)}px Fredoka, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(ft.text, (ft.x + 0.5) * tileSize, (ft.y + 0.5) * tileSize);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    function roundRect(context, x, y, w, h, r) {
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.arcTo(x + w, y, x + w, y + h, r);
+      context.arcTo(x + w, y + h, x, y + h, r);
+      context.arcTo(x, y + h, x, y, r);
+      context.arcTo(x, y, x + w, y, r);
+      context.closePath();
+    }
+
+    // Loop Animasi Utama 60fps
+    function gameLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
+      lastTimestamp = timestamp;
+
+      update(dt);
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    /**
+     * =========================================================================
+     * 6. SISTEM SOAL KOMBINATORIKA, HUD & MODAL
+     * =========================================================================
+     */
+    function updateHUD() {
+      const team = TEAMS[state.activeTeamIdx];
+      const hudTeamEl = document.getElementById('hudTeam');
+      hudTeamEl.textContent = `${team.icon} ${team.name}`;
+      hudTeamEl.className = `font-arcade text-base sm:text-lg truncate ${team.badgeClass}`;
+
+      document.getElementById('hudScore').textContent = state.score;
+      document.getElementById('hudLives').textContent = '❤️'.repeat(Math.max(0, state.lives)) || '💔';
+      document.getElementById('hudOrbs').textContent = `${state.orbsSolved} / 4`;
+
+      const statusEl = document.getElementById('hudStatus');
+      if (state.status === 'PLAYING') {
+        statusEl.textContent = state.superTimer > 0 ? '⚡ Mode Super!' : 'Berlangsung';
+        statusEl.className = 'text-xs sm:text-sm font-bold truncate ' + (state.superTimer > 0 ? 'text-amber-300' : 'text-emerald-400');
+      } else if (state.status === 'PAUSED') {
+        statusEl.textContent = 'Dijeda';
+        statusEl.className = 'text-xs sm:text-sm font-bold text-yellow-300 truncate';
+      } else if (state.status === 'QUESTION') {
+        statusEl.textContent = 'Menjawab Soal';
+        statusEl.className = 'text-xs sm:text-sm font-bold text-fuchsia-300 truncate';
+      } else {
+        statusEl.textContent = 'Siap Bermain';
+        statusEl.className = 'text-xs sm:text-sm font-bold text-sky-300 truncate';
+      }
+      updateSuperBar();
+    }
+
+    function updateSuperBar() {
+      const wrap = document.getElementById('superModeBarWrap');
+      const bar = document.getElementById('superModeBar');
+      if (state.superTimer > 0) {
+        wrap.classList.remove('hidden');
+        bar.style.width = `${Math.min(100, (state.superTimer / 8.5) * 100)}%`;
+      } else {
+        wrap.classList.add('hidden');
+      }
+    }
+
+    function triggerQuestion() {
+      state.status = 'QUESTION';
+      updateHUD();
+
+      const qObj = state.levelQuestions[state.orbsSolved] || LEVELS[state.levelIdx].questions[0];
+      state.activeQuestion = qObj;
+
+      document.getElementById('qTopicBadge').textContent = qObj.topic;
+      document.getElementById('qNumberBadge').textContent = `Soal ${state.orbsSolved + 1} / 4`;
+      document.getElementById('qText').innerHTML = qObj.q;
+
+      const optionsWrap = document.getElementById('qOptions');
+      optionsWrap.innerHTML = '';
+      const labels = ['A', 'B', 'C', 'D'];
+
+      qObj.options.forEach((optHtml, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-arcade text-left p-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 hover:border-sky-400 text-slate-100 flex items-center gap-3 text-sm sm:text-base font-medium transition';
+        btn.innerHTML = `
+          <span class="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 font-arcade flex items-center justify-center shrink-0">${labels[idx]}</span>
+          <span class="flex-1">${optHtml}</span>
+        `;
+        btn.addEventListener('click', () => handleAnswer(idx, btn));
+        optionsWrap.appendChild(btn);
+      });
+
+      document.getElementById('qFeedback').classList.add('hidden');
+      const modal = document.getElementById('questionModal');
+      modal.classList.remove('hidden');
+
+      renderMath(modal);
+    }
+
+    function handleAnswer(selectedIdx, clickedBtn) {
+      const qObj = state.activeQuestion;
+      const optionBtns = document.querySelectorAll('#qOptions button');
+      optionBtns.forEach(b => (b.disabled = true));
+
+      const isCorrect = selectedIdx === qObj.answer;
+      state.orbsSolved += 1;
+
+      const fbBox = document.getElementById('qFeedback');
+      const fbTitle = document.getElementById('qFeedbackTitle');
+      const fbExp = document.getElementById('qExplanation');
+
+      if (isCorrect) {
+        SoundFX.correct();
+        state.correctCount += 1;
+        state.score += 150;
+        state.superTimer = 8.5; // 8.5 detik Mode Super!
+
+        clickedBtn.classList.remove('border-slate-600', 'bg-slate-800');
+        clickedBtn.classList.add('border-emerald-400', 'bg-emerald-900/60');
+
+        fbBox.className = 'rounded-2xl p-4 border border-emerald-500/50 bg-emerald-950/50 space-y-2';
+        fbTitle.innerHTML = '<span class="text-emerald-400">✅ Benar! +150 Poin & Mode Super Aktif!</span>';
+      } else {
+        SoundFX.wrong();
+        clickedBtn.classList.remove('border-slate-600', 'bg-slate-800');
+        clickedBtn.classList.add('border-rose-500', 'bg-rose-950/60');
+        optionBtns[qObj.answer].classList.remove('border-slate-600', 'bg-slate-800');
+        optionBtns[qObj.answer].classList.add('border-emerald-400', 'bg-emerald-900/40');
+
+        fbBox.className = 'rounded-2xl p-4 border border-rose-500/50 bg-rose-950/40 space-y-2';
+        fbTitle.innerHTML = '<span class="text-rose-400">❌ Kurang Tepat — Mari Pelajari Pembahasannya:</span>';
+      }
+
+      fbExp.innerHTML = `<strong>Pembahasan:</strong><br/>${qObj.explain}`;
+      fbBox.classList.remove('hidden');
+      renderMath(fbBox);
+      updateHUD();
+    }
+
+    function showResultModal(isWin) {
+      state.status = isWin ? 'WON' : 'GAMEOVER';
+      if (isWin) SoundFX.win();
+
+      // Catat hasil sesi ke Papan Skor Kelompok Aktif
+      const team = TEAMS[state.activeTeamIdx];
+      team.score += state.score;
+      team.correct += state.correctCount;
+      team.totalQ += state.orbsSolved;
+      team.turns += 1;
+
+      const nextTeam = TEAMS[(state.activeTeamIdx + 1) % TEAMS.length];
+
+      document.getElementById('resIcon').textContent = isWin ? '🏆' : '👻';
+      document.getElementById('resTeamTag').textContent = `${team.icon} ${team.name} • Total Skor: ${team.score}`;
+      document.getElementById('resTitle').textContent = isWin ? 'Giliran Selesai!' : 'Kesempatan Habis!';
+      document.getElementById('resDesc').textContent = isWin
+        ? `Hebat ${team.name}! Skor sesi ini otomatis ditambahkan ke Papan Skor Kelas.`
+        : `Skor sesi ${team.name} tetap tersimpan di Papan Skor Kelas. Siap lanjut ke kelompok berikutnya?`;
+      document.getElementById('resScore').textContent = state.score;
+      document.getElementById('resAccuracy').textContent = `${state.correctCount} / ${Math.max(4, state.orbsSolved)}`;
+
+      document.getElementById('btnResNextTeam').textContent = `➡️ Giliran ${nextTeam.icon} ${nextTeam.name}`;
+
+      const nextBtn = document.getElementById('btnResNext');
+      if (isWin && state.levelIdx < LEVELS.length - 1) {
+        nextBtn.classList.remove('hidden');
+        nextBtn.textContent = 'Level +1 ▶';
+      } else if (isWin) {
+        nextBtn.classList.remove('hidden');
+        nextBtn.textContent = 'Level 1 ▶';
+      } else {
+        nextBtn.classList.add('hidden');
+      }
+
+      document.getElementById('resultModal').classList.remove('hidden');
+      updateHUD();
+    }
+
+    function renderLeaderboard() {
+      const list = document.getElementById('leaderboardList');
+      const ranked = [...TEAMS].sort((a, b) => b.score - a.score || b.correct - a.correct);
+      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+      list.innerHTML = ranked.map((t, rankIdx) => {
+        const isActive = t.id === state.activeTeamIdx;
+        const accPct = t.totalQ > 0 ? Math.round((t.correct / t.totalQ) * 100) : 0;
+        return `
+          <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border transition ${
+            isActive
+              ? 'bg-amber-500/15 border-amber-400/70 shadow-lg shadow-amber-500/10'
+              : 'bg-slate-800/70 border-slate-700/80 hover:border-slate-500'
+          }">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl w-8 text-center shrink-0">${medals[rankIdx]}</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-arcade text-base sm:text-lg ${t.badgeClass}">${t.icon} ${t.name}</span>
+                  ${isActive ? '<span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold uppercase">Aktif</span>' : ''}
+                </div>
+                <div class="text-xs text-slate-400">
+                  Bermain: <strong class="text-slate-200">${t.turns}×</strong> • Benar: <strong class="text-emerald-400">${t.correct}/${t.totalQ}</strong> (${accPct}%)
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <div class="text-[10px] uppercase text-slate-400">Skor</div>
+                <div class="font-arcade text-xl sm:text-2xl text-yellow-400">${t.score}</div>
+              </div>
+              <button data-select-team="${t.id}" class="btn-arcade px-3 py-1.5 rounded-xl text-xs font-bold ${
+                isActive
+                  ? 'bg-amber-400 text-slate-950'
+                  : 'bg-slate-700 hover:bg-sky-600 text-white'
+              }">
+                ${isActive ? 'Sedang Main' : 'Pilih Giliran'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Event tombol pilih giliran di dalam Papan Skor
+      list.querySelectorAll('[data-select-team]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.getAttribute('data-select-team'));
+          state.activeTeamIdx = id;
+          document.getElementById('leaderboardModal').classList.add('hidden');
+          initLevel(state.levelIdx, false);
+        });
+      });
+
+      const totalBank = LEVELS.reduce((acc, l) => acc + l.questions.length, 0);
+      const sisaDeck = questionDecks[state.levelIdx].length;
+      document.getElementById('deckStatusSummary').textContent =
+        `Total Bank Soal: ${totalBank} soal • Sisa soal baru di Level ${state.levelIdx + 1}: ${sisaDeck} soal`;
+    }
+
+    function openLeaderboard() {
+      if (state.status === 'PLAYING') {
+        state.status = 'PAUSED';
+        updateHUD();
+      }
+      resetConfirmPending = false;
+      document.getElementById('btnResetLeaderboard').textContent = '🗑️ Reset Skor Kelas';
+      renderLeaderboard();
+      document.getElementById('leaderboardModal').classList.remove('hidden');
+    }
+
+    /**
+     * =========================================================================
+     * 7. MODAL MATERI PENGANTAR (TAB INTERAKTIF)
+     * =========================================================================
+     */
+    let currentMatTab = 0;
+
+    function openMaterial(tabIdx = 0) {
+      if (state.status === 'PLAYING') {
+        state.status = 'PAUSED';
+        updateHUD();
+      }
+      currentMatTab = tabIdx;
+      renderMaterialTab();
+      document.getElementById('materialModal').classList.remove('hidden');
+    }
+
+    function renderMaterialTab() {
+      const mat = MATERIALS[currentMatTab];
+      const container = document.getElementById('materialContent');
+      container.innerHTML = `<h3 class="font-arcade text-xl text-sky-300 mb-2">${mat.title}</h3>${mat.html}`;
+
+      document.querySelectorAll('.mat-tab').forEach((btn, idx) => {
+        if (idx === currentMatTab) {
+          btn.className = 'mat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition bg-indigo-600 text-white shadow';
+        } else {
+          btn.className = 'mat-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition bg-slate-800 text-slate-300 hover:bg-slate-700';
+        }
+      });
+
+      document.getElementById('btnPrevTab').disabled = currentMatTab === 0;
+      document.getElementById('btnPrevTab').style.opacity = currentMatTab === 0 ? '0.4' : '1';
+      document.getElementById('btnNextTab').textContent = currentMatTab === MATERIALS.length - 1 ? 'Siap Bermain! 🎮' : 'Selanjutnya →';
+
+      renderMath(container);
+    }
+
+    /**
+     * =========================================================================
+     * 8. EVENT LISTENERS (KEYBOARD, D-PAD SENTUH, SWIPE, TOMBOL UI)
+     * =========================================================================
+     */
+    function setDirection(dir) {
+      if (state.status === 'READY') {
+        startGame();
+      }
+      if (state.pacman) {
+        state.pacman.nextDir = dir;
+      }
+    }
+
+    function startGame() {
+      document.getElementById('canvasOverlay').classList.add('hidden');
+      state.status = 'PLAYING';
+      updateHUD();
+    }
+
+    // Keyboard Panah & WASD
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        if (document.getElementById('materialModal').classList.contains('hidden') &&
+            document.getElementById('questionModal').classList.contains('hidden')) {
+          e.preventDefault();
+        }
+      }
+      const keyMap = {
+        ArrowUp: 'UP', w: 'UP', W: 'UP',
+        ArrowDown: 'DOWN', s: 'DOWN', S: 'DOWN',
+        ArrowLeft: 'LEFT', a: 'LEFT', A: 'LEFT',
+        ArrowRight: 'RIGHT', d: 'RIGHT', D: 'RIGHT'
+      };
+      if (keyMap[e.key] && (state.status === 'PLAYING' || state.status === 'READY')) {
+        setDirection(keyMap[e.key]);
+      }
+    });
+
+    // Tombol D-Pad Sentuh (mendukung pointer & touch untuk papan interaktif)
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+      const dir = btn.getAttribute('data-dir');
+      const handlePress = (e) => {
+        e.preventDefault();
+        btn.classList.add('active');
+        setDirection(dir);
+      };
+      const handleRelease = () => btn.classList.remove('active');
+
+      btn.addEventListener('pointerdown', handlePress);
+      btn.addEventListener('pointerup', handleRelease);
+      btn.addEventListener('pointerleave', handleRelease);
+    });
+
+    // Gestur Usap (Swipe) langsung di atas Kanvas
+    let touchStartX = 0;
+    let touchStartY = 0;
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (e.changedTouches.length > 0) {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.hypot(dx, dy) > 24) {
+          if (Math.abs(dx) > Math.abs(dy)) {
+            setDirection(dx > 0 ? 'RIGHT' : 'LEFT');
+          } else {
+            setDirection(dy > 0 ? 'DOWN' : 'UP');
+          }
+        }
+      }
+    }, { passive: true });
+
+    // Tombol-tombol UI
+    document.getElementById('btnStartGame').addEventListener('click', startGame);
+    document.getElementById('btnOpenMaterial').addEventListener('click', () => openMaterial(0));
+    document.getElementById('btnOverlayMaterial').addEventListener('click', () => openMaterial(0));
+
+    document.getElementById('btnCloseMaterial').addEventListener('click', () => {
+      document.getElementById('materialModal').classList.add('hidden');
+      if (state.status === 'PAUSED') {
+        document.getElementById('overlayTitle').textContent = 'Permainan Dijeda';
+        document.getElementById('btnStartGame').textContent = '▶ LANJUTKAN';
+        document.getElementById('canvasOverlay').classList.remove('hidden');
+      }
+    });
+
+    document.querySelectorAll('.mat-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentMatTab = Number(btn.getAttribute('data-tab'));
+        renderMaterialTab();
+      });
+    });
+
+    document.getElementById('btnPrevTab').addEventListener('click', () => {
+      if (currentMatTab > 0) {
+        currentMatTab--;
+        renderMaterialTab();
+      }
+    });
+
+    document.getElementById('btnNextTab').addEventListener('click', () => {
+      if (currentMatTab < MATERIALS.length - 1) {
+        currentMatTab++;
+        renderMaterialTab();
+      } else {
+        document.getElementById('materialModal').classList.add('hidden');
+      }
+    });
+
+    document.getElementById('btnContinueAfterQ').addEventListener('click', () => {
+      document.getElementById('questionModal').classList.add('hidden');
+      if (state.orbsSolved >= 4) {
+        showResultModal(true);
+      } else {
+        state.status = 'PLAYING';
+        updateHUD();
+      }
+    });
+
+    document.getElementById('btnPause').addEventListener('click', () => {
+      if (state.status === 'PLAYING') {
+        state.status = 'PAUSED';
+        document.getElementById('overlayTitle').textContent = 'Permainan Dijeda';
+        document.getElementById('btnStartGame').textContent = '▶ LANJUTKAN';
+        document.getElementById('canvasOverlay').classList.remove('hidden');
+        updateHUD();
+      } else if (state.status === 'PAUSED') {
+        startGame();
+      }
+    });
+
+    document.getElementById('btnCenterRestart').addEventListener('click', () => {
+      initLevel(state.levelIdx, false);
+    });
+
+    document.getElementById('levelSelector').addEventListener('change', (e) => {
+      initLevel(Number(e.target.value), false);
+    });
+
+    document.getElementById('teamSelector').addEventListener('change', (e) => {
+      state.activeTeamIdx = Number(e.target.value);
+      initLevel(state.levelIdx, false);
+    });
+
+    document.getElementById('btnOpenLeaderboard').addEventListener('click', openLeaderboard);
+    document.getElementById('btnCloseLeaderboard').addEventListener('click', () => {
+      document.getElementById('leaderboardModal').classList.add('hidden');
+      if (state.status === 'PAUSED') {
+        document.getElementById('overlayTitle').textContent = 'Permainan Dijeda';
+        document.getElementById('btnStartGame').textContent = '▶ LANJUTKAN';
+        document.getElementById('canvasOverlay').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('btnResetLeaderboard').addEventListener('click', (e) => {
+      if (!resetConfirmPending) {
+        resetConfirmPending = true;
+        e.currentTarget.textContent = '⚠️ Klik Lagi untuk Konfirmasi Reset';
+        return;
+      }
+      resetConfirmPending = false;
+      TEAMS.forEach(t => {
+        t.score = 0;
+        t.correct = 0;
+        t.totalQ = 0;
+        t.turns = 0;
+      });
+      // Kocok ulang semua dek soal
+      questionDecks[0] = [];
+      questionDecks[1] = [];
+      questionDecks[2] = [];
+      e.currentTarget.textContent = '🗑️ Reset Skor Kelas';
+      renderLeaderboard();
+    });
+
+    document.getElementById('btnFullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    });
+
+    document.getElementById('btnSound').addEventListener('click', (e) => {
+      const isOn = SoundFX.toggle();
+      e.currentTarget.textContent = isOn ? '🔊' : '🔇';
+    });
+
+    // Toggle Sembunyikan/Tampilkan Rumus Cepat (Untuk Mode Latihan Kelas)
+    let formulaVisible = true;
+    document.getElementById('btnToggleFormula').addEventListener('click', (e) => {
+      formulaVisible = !formulaVisible;
+      const box = document.getElementById('quickFormulaBox');
+      if (formulaVisible) {
+        box.classList.remove('blur-md', 'select-none');
+        e.currentTarget.textContent = '👁 Sembunyikan';
+      } else {
+        box.classList.add('blur-md', 'select-none');
+        e.currentTarget.textContent = '👁 Tampilkan';
+      }
+    });
+
+    document.getElementById('btnResReplay').addEventListener('click', () => {
+      document.getElementById('resultModal').classList.add('hidden');
+      initLevel(state.levelIdx, false);
+      startGame();
+    });
+
+    document.getElementById('btnResNextTeam').addEventListener('click', () => {
+      document.getElementById('resultModal').classList.add('hidden');
+      state.activeTeamIdx = (state.activeTeamIdx + 1) % TEAMS.length;
+      initLevel(state.levelIdx, false);
+    });
+
+    document.getElementById('btnResLeaderboard').addEventListener('click', () => {
+      document.getElementById('resultModal').classList.add('hidden');
+      openLeaderboard();
+    });
+
+    document.getElementById('btnResNext').addEventListener('click', () => {
+      document.getElementById('resultModal').classList.add('hidden');
+      const nextIdx = state.levelIdx < LEVELS.length - 1 ? state.levelIdx + 1 : 0;
+      initLevel(nextIdx, false);
+      startGame();
+    });
+
+    // Jalankan inisialisasi saat halaman siap
+    window.addEventListener('resize', resizeCanvas);
+    window.onload = function () {
+      initLevel(0, false);
+      resizeCanvas();
+      requestAnimationFrame(gameLoop);
+      // Pastikan MathJax merender formula awal begitu skrip selesai dimuat
+      setTimeout(() => renderMath(document.getElementById('quickFormulaBox')), 700);
+    };
+  </script>
+</body>
+</html>
